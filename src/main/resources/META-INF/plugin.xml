@@ -1,0 +1,26 @@
+<idea-plugin>
+
+  <id>com.tecknobit.mantisplugin</id>
+  <version>1.0.0</version>
+  <name>Mantis</name>
+  <vendor email="infotecknobitcompany@gmail.com" url="https://github.com/N7ghtm4r3">Tecknobit</vendor>
+
+  <description>
+    <![CDATA[
+        Mantis allows you to manage your string resources and translate them automatically.
+        Select and add a new set of resources to translate selecting between a multiple languages list available
+        Manage the translation of the content of your applications with Mantis!
+    ]]>
+  </description>
+
+  <change-notes>
+    <![CDATA[
+            <h1>v. 1.0.0</h1><br>
+        ]]>
+  </change-notes>
+
+  <depends>com.intellij.modules.platform</depends>
+
+  <extensions defaultExtensionNs="com.intellij"/>
+
+</idea-plugin>
