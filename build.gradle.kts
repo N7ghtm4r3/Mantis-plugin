@@ -5,23 +5,30 @@ plugins {
 }
 
 group = "com.tecknobit"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
   mavenCentral()
+  maven("https://jitpack.io")
+  maven("https://repo.clojars.org")
+  // TO-DO: TESTING PURPOSES ONLY REMOVE
+  mavenLocal()
 }
 
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
   version.set("2023.1.5")
-  type.set("IC") // Target IDE Platform
+  type.set("IC")
 
   plugins.set(listOf(/* Plugin Dependencies */))
 }
 
+dependencies {
+
+  implementation("com.tecknobit.mantis:Mantis:1.0.0")
+
+}
+
 tasks {
-  // Set the JVM compatibility versions
   withType<JavaCompile> {
     sourceCompatibility = "17"
     targetCompatibility = "17"

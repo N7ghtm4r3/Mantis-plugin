@@ -21,6 +21,15 @@
 
   <depends>com.intellij.modules.platform</depends>
 
-  <extensions defaultExtensionNs="com.intellij"/>
+  <actions>
+    <action id="createMantisResource" class="com.tecknobit.mantis.CreateResource" text="Create A New Mantis Resource">
+      <add-to-group group-id="GenerateGroup" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl L" replace-all="true"/>
+    </action>
+    <action id="noCreateMantisResource" class="com.tecknobit.mantis.CreateResource" text="Ignore Mantis Resource Creation">
+      <add-to-group group-id="GenerateGroup" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl G" replace-all="true"/>
+    </action>
+  </actions>
 
 </idea-plugin>
