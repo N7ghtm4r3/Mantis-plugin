@@ -19,7 +19,7 @@ intellij {
   version.set("2023.1.5")
   type.set("IC")
 
-  plugins.set(listOf(/* Plugin Dependencies */))
+  plugins.set(listOf("com.intellij.java"))
 }
 
 dependencies {
