@@ -25,10 +25,19 @@
   <extensions defaultExtensionNs="com.intellij">
     <fileType
             name="Mantis Resources File"
-            implementationClass="configs.MantisFileType"
+            implementationClass="language.configs.MantisFileType"
             fieldName="INSTANCE"
             language="Mantis"
             extensions="mantis"/>
+    <lang.parserDefinition
+            language="Mantis"
+            implementationClass="language.parser.SimpleParserDefinition"/>
+    <lang.syntaxHighlighterFactory
+            language="Mantis"
+            implementationClass="language.highlighter.SimpleSyntaxHighlighterFactory"/>
+    <annotator
+            language="JAVA"
+            implementationClass="language.MantisAnnotator"/>
   </extensions>
 
   <actions>

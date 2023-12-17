@@ -1,4 +1,4 @@
-package configs;
+package language.configs;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.IconLoader;

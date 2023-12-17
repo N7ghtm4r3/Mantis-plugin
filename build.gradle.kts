@@ -15,6 +15,14 @@ repositories {
   mavenLocal()
 }
 
+sourceSets {
+  main {
+    java {
+      srcDirs("src/main/gen")
+    }
+  }
+}
+
 intellij {
   version.set("2023.1.5")
   type.set("IC")
@@ -51,4 +59,5 @@ tasks {
   publishPlugin {
     token.set(System.getenv("PUBLISH_TOKEN"))
   }
+
 }
