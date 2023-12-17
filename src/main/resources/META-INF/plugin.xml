@@ -29,26 +29,9 @@
             fieldName="INSTANCE"
             language="Mantis"
             extensions="mantis"/>
-    <lang.parserDefinition
-            language="Mantis"
-            implementationClass="language.parser.SimpleParserDefinition"/>
-    <lang.syntaxHighlighterFactory
-            language="Mantis"
-            implementationClass="language.highlighter.SimpleSyntaxHighlighterFactory"/>
     <annotator
             language="JAVA"
             implementationClass="language.MantisAnnotator"/>
   </extensions>
-
-  <actions>
-    <action id="createMantisResource" class="com.tecknobit.mantis.actions.CreateResource" text="Create A New Mantis Resource">
-      <add-to-group group-id="GenerateGroup" anchor="last"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="ctrl L" replace-all="true"/>
-    </action>
-    <action id="noCreateMantisResource" class="com.tecknobit.mantis.actions.CreateResource" text="Ignore Mantis Resource Creation">
-      <add-to-group group-id="GenerateGroup" anchor="last"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="ctrl G" replace-all="true"/>
-    </action>
-  </actions>
 
 </idea-plugin>
