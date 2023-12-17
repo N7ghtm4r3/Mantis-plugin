@@ -13,7 +13,7 @@ public class MantisAnnotator implements Annotator {
     public void annotate(@NotNull final PsiElement element, @NotNull AnnotationHolder holder) {
         if ((element instanceof PsiLiteralExpression)) {
             holder.newAnnotation(HighlightSeverity.WARNING, "Create a new Mantis resource")
-                    .withFix(new CreateResourceFix())
+                    .withFix(new CreateResourceFix(element))
                     .create();
         }
     }

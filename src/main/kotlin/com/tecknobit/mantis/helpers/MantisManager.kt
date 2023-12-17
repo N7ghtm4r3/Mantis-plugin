@@ -1,6 +1,7 @@
 package com.tecknobit.mantis.helpers
 
 import com.tecknobit.mantis.Mantis
+import java.io.File
 import java.util.*
 
 class MantisManager {
@@ -16,7 +17,7 @@ class MantisManager {
         var mantis: Mantis = Mantis(Locale.getDefault())
 
         fun createNewResource(mantisResource: MantisResource) {
-
+            println(Scanner(File(javaClass.classLoader.getResources("resources.mantis").nextElement().path)).next("\\Z"))
         }
 
     }

@@ -13,9 +13,9 @@ import com.tecknobit.mantis.helpers.MantisManager.Companion.mantis
 import com.tecknobit.mantis.helpers.MantisManager.MantisResource
 import javax.swing.JComponent
 
-class CreateResourceDialog: DialogWrapper(true) {
-
-    private val mantisResource = MantisResource()
+class CreateResourceDialog(
+    private val mantisResource: MantisResource
+): DialogWrapper(true) {
 
     private lateinit var panel: DialogPanel
 
