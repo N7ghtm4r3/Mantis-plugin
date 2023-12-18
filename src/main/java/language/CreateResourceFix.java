@@ -11,7 +11,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.IncorrectOperationException;
 import com.tecknobit.mantis.actions.CreateResourceDialog;
-import com.tecknobit.mantis.helpers.MantisManager;
+import com.tecknobit.mantis.helpers.MantisManager.MantisResource;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
@@ -27,10 +27,11 @@ public class CreateResourceFix extends BaseIntentionAction {
 
     private static String RESOURCES_PATH = null;
 
-    private final MantisManager.MantisResource mantisResource;
+    private final MantisResource mantisResource;
 
     public CreateResourceFix(PsiElement resourceValue) {
-        mantisResource = new MantisManager.MantisResource();
+        mantisResource = new MantisResource();
+        mantisResource.setResourceElement(resourceValue);
         mantisResource.setResource(resourceValue.getText().replace("\"", ""));
     }
 
@@ -52,6 +53,7 @@ public class CreateResourceFix extends BaseIntentionAction {
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile psiFile) throws IncorrectOperationException {
         try {
+            mantisResource.setProject(project);
             mantisResource.setResourcesFile(getCurrentResourcesFile(project));
             ApplicationManager.getApplication().invokeLater(() -> new CreateResourceDialog(mantisResource).show());
         } catch (Exception ignored){}

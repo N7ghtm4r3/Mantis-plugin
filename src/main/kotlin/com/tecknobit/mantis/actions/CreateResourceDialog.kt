@@ -48,10 +48,6 @@ class CreateResourceDialog(
             row {
                 checkBox("Auto translate the resource")
                     .bindSelected(mantisResource::autoTranslate)
-                    .component.addActionListener {
-                        contentPane.invalidate()
-                        contentPane.repaint()
-                    }
             }
         }
         return panel
