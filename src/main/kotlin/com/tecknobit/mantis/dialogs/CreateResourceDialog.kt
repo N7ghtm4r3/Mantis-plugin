@@ -1,4 +1,4 @@
-package com.tecknobit.mantis.actions
+package com.tecknobit.mantis.dialogs
 
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.DialogWrapper

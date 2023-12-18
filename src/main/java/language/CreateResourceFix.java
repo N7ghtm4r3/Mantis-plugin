@@ -10,7 +10,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.IncorrectOperationException;
-import com.tecknobit.mantis.actions.CreateResourceDialog;
+import com.tecknobit.mantis.dialogs.CreateResourceDialog;
 import com.tecknobit.mantis.helpers.MantisManager.MantisResource;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;

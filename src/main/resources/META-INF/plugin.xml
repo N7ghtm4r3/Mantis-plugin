@@ -34,4 +34,14 @@
             implementationClass="language.MantisAnnotator"/>
   </extensions>
 
+  <actions>
+    <action id="createMantisResource"
+            class="com.tecknobit.mantis.dialogs.LanguagesDialog"
+            text="Edit Current Languages Set"
+            description="Edit the current languages to manage with Mantis">
+      <add-to-group group-id="GenerateGroup" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl L" replace-all="true"/>
+    </action>
+  </actions>
+
 </idea-plugin>
