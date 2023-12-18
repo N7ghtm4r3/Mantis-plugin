@@ -10,6 +10,7 @@ import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 import com.tecknobit.mantis.helpers.MantisManager.Companion.mantisManager
 import com.tecknobit.mantis.helpers.MantisManager.MantisResource
+import net.suuft.libretranslate.Language
 import javax.swing.JComponent
 
 class CreateResourceDialog(
@@ -26,6 +27,7 @@ class CreateResourceDialog(
     }
 
     override fun createCenterPanel(): JComponent {
+        mantisManager.mantisResource = this.mantisResource
         panel = panel {
             row("Enter the resource key") {}
             row {
@@ -35,6 +37,13 @@ class CreateResourceDialog(
                         isOKActionEnabled = true
                     }
             }
+            row("Language destination source") {}.visible(mantisResource.autoTranslate)
+            row {
+                val comboBox = comboBox(mantisManager.currentLanguagesSet())
+                comboBox.component.addItemListener { itemEvent ->
+                    mantisResource.defLanguageValue = itemEvent.item as Language
+                }
+            }.visible(mantisResource.autoTranslate)
             row {
                 checkBox("Auto translate the resource")
                     .bindSelected(mantisResource::autoTranslate)
@@ -58,7 +67,7 @@ class CreateResourceDialog(
 
     override fun doOKAction() {
         super.doOKAction()
-        mantisManager.createNewResource(mantisResource)
+        mantisManager.createNewResource()
     }
 
 }

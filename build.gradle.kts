@@ -26,6 +26,7 @@ dependencies {
 
   implementation("com.tecknobit.mantis:Mantis:1.0.0")
   implementation("org.json:json:20230227")
+  implementation("net.clojars.suuft:libretranslate-java:1.0.5")
 
 }
 

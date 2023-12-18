@@ -1,6 +1,7 @@
 package com.tecknobit.mantis.helpers
 
 import com.tecknobit.mantis.Mantis
+import net.suuft.libretranslate.Language
 import org.json.JSONObject
 import java.io.File
 import java.io.FileWriter
@@ -12,12 +13,16 @@ open class MantisManager {
 
         val mantisManager = MantisManager()
 
+        val languagesSupported = Language.values()
+
     }
 
     private var currentResources = JSONObject()
 
-    fun createNewResource(mantisResource: MantisResource) {
-        currentResources = JSONObject(Scanner(mantisResource.resourcesFile!!).useDelimiter("\\Z").next())
+    var mantisResource = MantisResource()
+
+    fun createNewResource() {
+        loadResources()
         val autoTranslate = mantisResource.autoTranslate
         var resource = mantisResource.resource
         currentResources.keys().forEach { language ->
@@ -32,13 +37,37 @@ open class MantisManager {
         fileWriter.flush()
     }
 
+    fun currentLanguagesSet(): List<Language> {
+        loadResources()
+        val languages = mutableListOf<Language>()
+        currentResources.keys().forEach { language ->
+            var vLanguage: Language? = null
+            languagesSupported.forEach { sLanguage ->
+                if (sLanguage.code == Locale.forLanguageTag(language).language) {
+                    println(sLanguage.code)
+                    println(Locale.forLanguageTag(language).language)
+                    vLanguage = sLanguage
+                }
+            }
+            languages.add(vLanguage!!)
+        }
+        return languages
+    }
+
     fun keyExists(resourceKey: String): Boolean {
+        loadResources()
         return currentResources.toString().contains("\"$resourceKey\":")
+    }
+
+    private fun loadResources() {
+        if(currentResources.isEmpty)
+            currentResources = JSONObject(Scanner(mantisResource.resourcesFile!!).useDelimiter("\\Z").next())
     }
 
     data class MantisResource(
         var resourcesFile: File? = null,
         var resource: String = "",
+        var defLanguageValue: Language? = null,
         var key: String = "",
         var autoTranslate: Boolean = true
     )
