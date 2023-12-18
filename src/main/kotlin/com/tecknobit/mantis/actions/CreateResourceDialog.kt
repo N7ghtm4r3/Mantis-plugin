@@ -37,16 +37,21 @@ class CreateResourceDialog(
                         isOKActionEnabled = true
                     }
             }
-            row("Language destination source") {}.visible(mantisResource.autoTranslate)
+            row("Language destination source") {}
             row {
                 val comboBox = comboBox(mantisManager.currentLanguagesSet())
+                mantisResource.defLanguageValue = comboBox.component.item
                 comboBox.component.addItemListener { itemEvent ->
                     mantisResource.defLanguageValue = itemEvent.item as Language
                 }
-            }.visible(mantisResource.autoTranslate)
+            }
             row {
                 checkBox("Auto translate the resource")
                     .bindSelected(mantisResource::autoTranslate)
+                    .component.addActionListener {
+                        contentPane.invalidate()
+                        contentPane.repaint()
+                    }
             }
         }
         return panel
