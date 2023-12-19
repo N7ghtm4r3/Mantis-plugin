@@ -4,10 +4,7 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.components.JBTextField
-import com.intellij.ui.dsl.builder.Cell
-import com.intellij.ui.dsl.builder.bindSelected
-import com.intellij.ui.dsl.builder.bindText
-import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.builder.*
 import com.tecknobit.mantis.helpers.MantisManager.Companion.mantisManager
 import com.tecknobit.mantis.helpers.MantisManager.MantisResource
 import net.suuft.libretranslate.Language
@@ -40,6 +37,7 @@ class CreateResourceDialog(
             row("Language destination source") {}
             row {
                 val comboBox = comboBox(mantisManager.currentLanguagesSet())
+                    .align(Align.FILL)
                 mantisResource.defLanguageValue = comboBox.component.item
                 comboBox.component.addItemListener { itemEvent ->
                     mantisResource.defLanguageValue = itemEvent.item as Language

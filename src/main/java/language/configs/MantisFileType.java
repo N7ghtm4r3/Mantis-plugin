@@ -12,7 +12,7 @@ public final class MantisFileType extends LanguageFileType {
     public static final MantisFileType INSTANCE = new MantisFileType();
 
     // TODO: SET THE CORRECT ICON
-    public static final Icon MANTIS_ICON = IconLoader.getIcon("/icons/tecknobit.png", MantisFileType.class);
+    public static final Icon MANTIS_ICON = IconLoader.getIcon("/icons/pluginIcon.svg", MantisFileType.class);
 
     private MantisFileType() {
         super(MantisLanguage.INSTANCE);
