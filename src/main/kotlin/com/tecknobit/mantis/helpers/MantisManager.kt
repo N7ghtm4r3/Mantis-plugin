@@ -11,6 +11,7 @@ import com.intellij.psi.PsiFile
 import com.tecknobit.mantis.Mantis
 import net.suuft.libretranslate.Language
 import net.suuft.libretranslate.Translator
+import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.json.JSONObject
 import java.io.File
 import java.io.FileWriter
@@ -82,15 +83,21 @@ open class MantisManager {
         saveResources(mantisResource.resourcesFile!!, currentResources, project)
         WriteCommandAction.writeCommandAction(project).run<Throwable> {
             val currentExpression = mantisResource.resourceElement!!
-            val factory: PsiElementFactory = JavaPsiFacade.getInstance(mantisResource.project!!).elementFactory
-            val semiColon = if(currentExpression.text.endsWith(";"))
-                ";"
-            else
-                ""
-            currentExpression.replace(factory.createExpressionFromText(
-                "$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")$semiColon",
-                null
-            ))
+            if(mantisResource.isJavaExpression) {
+                val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
+                val semiColon = if(currentExpression.text.endsWith(";"))
+                    ";"
+                else
+                    ""
+                currentExpression.replace(factory.createExpressionFromText(
+                    "$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")$semiColon",
+                    null
+                ))
+            } else {
+                val psiFactory = KtPsiFactory(project)
+                currentExpression.replace(psiFactory
+                    .createExpression("$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")"))
+            }
         }
     }
 
@@ -164,6 +171,7 @@ open class MantisManager {
     }
 
     data class MantisResource(
+        var isJavaExpression: Boolean = true,
         var project: Project? = null,
         var psiFile: PsiFile? = null,
         var resourcesFile: File? = null,

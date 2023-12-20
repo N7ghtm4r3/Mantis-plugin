@@ -19,8 +19,9 @@ public class CreateResourceFix extends BaseIntentionAction {
 
     private final MantisResource mantisResource;
 
-    public CreateResourceFix(PsiElement resourceValue) {
+    public CreateResourceFix(boolean isJavaExpression, PsiElement resourceValue) {
         mantisResource = new MantisResource();
+        mantisResource.setJavaExpression(isJavaExpression);
         mantisResource.setResourceElement(resourceValue);
         mantisResource.setResource(resourceValue.getText().replace("\"", ""));
     }

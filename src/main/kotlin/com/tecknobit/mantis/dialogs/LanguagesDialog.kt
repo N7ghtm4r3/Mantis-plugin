@@ -58,7 +58,7 @@ class LanguagesDialog: AnAction() {
 
         init {
             title = "Edit Current Languages Set"
-            setSize(400, 600)
+            setSize(500, 500)
             init()
         }
 
@@ -77,6 +77,7 @@ class LanguagesDialog: AnAction() {
                         text(language.name)
                         checkBox("Auto translate the resource")
                             .bindSelected(languageSet::translate)
+                            .component.isVisible = languageSet.inserted
                     }
                     separator()
                     languagesSet.add(languageSet)
