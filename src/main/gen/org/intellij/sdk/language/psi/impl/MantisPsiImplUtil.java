@@ -9,7 +9,6 @@ public class MantisPsiImplUtil {
     public static String getKey(MantisProperty element) {
         ASTNode keyNode = element.getNode().findChildByType(MantisTypes.KEY);
         if (keyNode != null) {
-            // IMPORTANT: Convert embedded escaped spaces to simple spaces
             return keyNode.getText().replaceAll("\\\\ ", " ");
         } else {
             return null;

@@ -41,9 +41,9 @@
             implementationClass="org.intellij.sdk.language.parser.MantisParserDefinition"/>
     <lang.syntaxHighlighterFactory
             language="Mantis"
-            implementationClass="language.configs.highlighter.MantisSyntaxHighlighterFactory"/>
+            implementationClass="configs.highlighter.MantisSyntaxHighlighterFactory"/>
     <colorSettingsPage
-            implementation="language.configs.MantisColorSettingsPage"/>
+            implementation="configs.MantisColorSettingsPage"/>
   </extensions>
 
   <actions>

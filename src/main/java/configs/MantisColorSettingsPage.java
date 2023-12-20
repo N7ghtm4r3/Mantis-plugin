@@ -22,9 +22,8 @@ final class MantisColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Bad value", MantisSyntaxHighlighter.BAD_CHARACTER)
     };
 
-    @Nullable
     @Override
-    public Icon getIcon() {
+    public @NotNull Icon getIcon() {
         return MantisFileType.MANTIS_ICON;
     }
 
