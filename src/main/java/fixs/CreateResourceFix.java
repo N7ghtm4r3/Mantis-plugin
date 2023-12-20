@@ -1,4 +1,4 @@
-package language;
+package fixs;
 
 import com.intellij.codeInsight.intention.impl.BaseIntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;

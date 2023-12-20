@@ -1,4 +1,4 @@
-package language.configs;
+package configs;
 
 import com.intellij.lang.Language;
 

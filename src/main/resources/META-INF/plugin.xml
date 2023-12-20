@@ -26,16 +26,24 @@
   <extensions defaultExtensionNs="com.intellij">
     <fileType
             name="Mantis Resources File"
-            implementationClass="language.configs.MantisFileType"
+            implementationClass="configs.file.MantisFileType"
             fieldName="INSTANCE"
             language="Mantis"
             extensions="mantis"/>
     <annotator
             language="JAVA"
-            implementationClass="language.MantisAnnotator"/>
+            implementationClass="annotators.MantisAnnotator"/>
     <annotator
             language="kotlin"
-            implementationClass="language.MantisAnnotator"/>
+            implementationClass="annotators.MantisAnnotator"/>
+    <lang.parserDefinition
+            language="Mantis"
+            implementationClass="org.intellij.sdk.language.parser.MantisParserDefinition"/>
+    <lang.syntaxHighlighterFactory
+            language="Mantis"
+            implementationClass="language.configs.highlighter.MantisSyntaxHighlighterFactory"/>
+    <colorSettingsPage
+            implementation="language.configs.MantisColorSettingsPage"/>
   </extensions>
 
   <actions>

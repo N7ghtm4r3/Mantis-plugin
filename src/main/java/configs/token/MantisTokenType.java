@@ -1,6 +1,7 @@
-package language.configs;
+package configs.token;
 
 import com.intellij.psi.tree.IElementType;
+import configs.MantisLanguage;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 

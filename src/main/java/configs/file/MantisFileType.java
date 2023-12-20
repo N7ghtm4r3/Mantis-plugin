@@ -1,7 +1,8 @@
-package language.configs;
+package configs.file;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.IconLoader;
+import configs.MantisLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,8 +12,7 @@ public final class MantisFileType extends LanguageFileType {
 
     public static final MantisFileType INSTANCE = new MantisFileType();
 
-    // TODO: SET THE CORRECT ICON
-    public static final Icon MANTIS_ICON = IconLoader.getIcon("/icons/pluginIcon.svg", MantisFileType.class);
+    public static final Icon MANTIS_ICON = IconLoader.getIcon("/icons/mantis.svg", MantisFileType.class);
 
     private MantisFileType() {
         super(MantisLanguage.INSTANCE);

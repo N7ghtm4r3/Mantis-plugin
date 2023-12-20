@@ -1,4 +1,4 @@
-package language.configs;
+package configs;
 
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NonNls;

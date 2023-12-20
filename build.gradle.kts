@@ -22,6 +22,8 @@ intellij {
   plugins.set(listOf("com.intellij.java", "org.jetbrains.kotlin"))
 }
 
+sourceSets["main"].java.srcDirs("src/main/gen")
+
 dependencies {
 
   implementation("com.tecknobit.mantis:Mantis:1.0.0")
