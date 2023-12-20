@@ -58,29 +58,61 @@ class LanguagesDialog: AnAction() {
 
         init {
             title = "Edit Current Languages Set"
-            setSize(500, 500)
+            setSize(400, 500)
             init()
         }
 
         override fun createCenterPanel(): JComponent {
             panel = panel {
-                languagesSupported.forEach { language ->
-                    val languageSet = LanguageSet(
-                        inserted = languageSetExists(language),
-                        language = language,
-                        translate = false
-                    )
-                    row {
-                        checkBox("")
-                            .bindSelected(languageSet::inserted)
-                            .component.isSelected = languageSet.inserted
-                        text(language.name)
-                        checkBox("Auto translate the resource")
-                            .bindSelected(languageSet::translate)
-                            .component.isVisible = languageSet.inserted
+                for (j in 0 until languagesSupported.size step 3) {
+                    val rowLanguages = mutableListOf<LanguageSet>()
+                    for (k in 0 until 3) {
+                        val language = languagesSupported[(k + j)]
+                        rowLanguages.add(
+                            LanguageSet(
+                                inserted = languageSetExists(language),
+                                language = language,
+                                translate = false
+                            )
+                        )
                     }
+                    threeColumnsRow(
+                        column1 = {
+                            checkBox("")
+                                .bindSelected(rowLanguages[0]::inserted)
+                                .component.isSelected = rowLanguages[0].inserted
+                            text(rowLanguages[0].language.name)
+                            /*for(i in 0 until 3) {
+                                val languageSet = rowLanguages[i]
+                                checkBox("")
+                                    .bindSelected(languageSet::inserted)
+                                    .component.isSelected = languageSet.inserted
+                                text(languageSet.language.name)
+                            }*/
+                        },
+                        column2 = {
+                            checkBox("")
+                                .bindSelected(rowLanguages[1]::inserted)
+                                .component.isSelected = rowLanguages[1].inserted
+                            text(rowLanguages[1].language.name)
+                            /*for(i in 0 until 3) {
+                                val languageSet = rowLanguages[i]
+                                checkBox("Auto translate the set")
+                                    .bindSelected(languageSet::translate)
+                                    //.component.isVisible = languageSet.inserted
+                            }*/
+                        },
+                        column3 = {
+                            checkBox("")
+                                .bindSelected(rowLanguages[2]::inserted)
+                                .component.isSelected = rowLanguages[2].inserted
+                            text(rowLanguages[2].language.name)
+                            checkBox("Auto translate the set")
+                                .bindSelected(rowLanguages[2]::translate)
+                        }
+                    )
                     separator()
-                    languagesSet.add(languageSet)
+                    languagesSet.addAll(rowLanguages)
                 }
             }
             return panel
