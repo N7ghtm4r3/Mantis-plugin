@@ -7,17 +7,14 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementFactory
-import com.intellij.psi.PsiFile
-import com.tecknobit.mantis.Mantis
+import com.intellij.psi.impl.file.PsiDirectoryFactory
+import com.tecknobit.mantis.Mantis.MANTIS_RESOURCES_PATH
 import net.suuft.libretranslate.Language
 import net.suuft.libretranslate.Translator
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.json.JSONObject
-import java.io.File
-import java.io.FileWriter
-import java.io.IOException
+import java.nio.charset.StandardCharsets.UTF_8
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 
 
 open class MantisManager {
@@ -30,41 +27,30 @@ open class MantisManager {
 
         val mantisManager = MantisManager()
 
+        private var resourcesFile: VirtualFile? = null
+
         val languagesSupported = Language.values().toMutableList().subList(0, Language.values().size - 1)
 
-        private var resourcesPath: String? = null
-
-        fun getCurrentResourcesFile(project: Project): File {
-            if (resourcesPath == null) {
-                val resourcesLeafPath = AtomicReference("")
-                ProjectRootManager.getInstance(project).fileIndex.iterateContent { file: VirtualFile ->
-                    val path = file.path
-                    if (path.endsWith(Mantis.MANTIS_RESOURCES_PATH)) resourcesPath = path
-                    else if (path.endsWith("/main/resources")) {
-                        resourcesLeafPath.set(path)
-                    }
-                    true
-                }
-                if (resourcesPath == null) {
-                    try {
-                        val resourcesPath = resourcesLeafPath.get() + "/" + Mantis.MANTIS_RESOURCES_PATH
-                        if (File(resourcesPath).createNewFile()) {
-                            val fileWriter = FileWriter(resourcesPath, false)
-                            fileWriter.write(
-                                JSONObject().put(
-                                    Locale.getDefault().language,
-                                    JSONObject()
-                                ).toString(4)
-                            )
-                            fileWriter.flush()
-                            fileWriter.close()
+        fun setCurrentResourcesFile(project: Project) {
+            if(resourcesFile == null) {
+                for (virtualFile in ProjectRootManager.getInstance(project).contentRoots) {
+                    if (virtualFile.path.endsWith("main")) {
+                        val resDirectory = virtualFile.findOrCreateChildData("mantis", "resources")
+                        val mantisResourcesFile = resDirectory.findChild(MANTIS_RESOURCES_PATH)
+                        if(mantisResourcesFile != null)
+                            resourcesFile = mantisResourcesFile
+                        else {
+                            resourcesFile = PsiDirectoryFactory.getInstance(project)
+                                .createDirectory(resDirectory)
+                                .createFile(MANTIS_RESOURCES_PATH).virtualFile
+                            resourcesFile!!.setBinaryContent(JSONObject().put(
+                                Locale.getDefault().language,
+                                JSONObject()
+                            ).toString(4).toByteArray(UTF_8))
                         }
-                    } catch (e: IOException) {
-                        throw RuntimeException(e)
                     }
                 }
             }
-            return File(resourcesPath!!)
         }
 
     }
@@ -72,7 +58,7 @@ open class MantisManager {
     private var currentResources = JSONObject()
 
     var mantisResource = MantisResource()
-    
+
     fun createNewResource() {
         loadResources()
         val resourceKey = formatKey(mantisResource.key)
@@ -80,7 +66,7 @@ open class MantisManager {
             createSingleResource(mantisResource, currentResources, language)
         }
         val project = mantisResource.project!!
-        saveResources(mantisResource.resourcesFile!!, currentResources, project)
+        saveResources(currentResources, project)
         WriteCommandAction.writeCommandAction(project).run<Throwable> {
             val currentExpression = mantisResource.resourceElement!!
             if(mantisResource.isJavaExpression) {
@@ -120,15 +106,17 @@ open class MantisManager {
     }
 
     fun saveResources(
-        resourcesFile: File,
         currentResources: JSONObject,
         project: Project
     ) {
-        WriteCommandAction.writeCommandAction(project).run<Throwable> {
-            val fileWriter = FileWriter(resourcesFile, false)
-            fileWriter.write(currentResources.toString(4))
-            fileWriter.flush()
-            fileWriter.close()
+        ProjectRootManager.getInstance(project).fileIndex.iterateContent { file: VirtualFile ->
+            val path = file.path
+            if (path.endsWith(MANTIS_RESOURCES_PATH)) {
+                WriteCommandAction.writeCommandAction(project).run<Throwable> {
+                    file.setBinaryContent(currentResources.toString(4).toByteArray(UTF_8))
+                }
+            }
+            true
         }
     }
 
@@ -167,14 +155,12 @@ open class MantisManager {
     }
 
     private fun loadResources() {
-        currentResources = JSONObject(Scanner(mantisResource.resourcesFile!!).useDelimiter("\\Z").next())
+        currentResources = JSONObject(String(resourcesFile!!.contentsToByteArray()))
     }
 
     data class MantisResource(
         var isJavaExpression: Boolean = true,
         var project: Project? = null,
-        var psiFile: PsiFile? = null,
-        var resourcesFile: File? = null,
         var resourceElement: PsiElement? = null,
         var resource: String = "",
         var defLanguageValue: Language? = null,

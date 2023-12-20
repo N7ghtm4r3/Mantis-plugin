@@ -44,10 +44,11 @@ public class CreateResourceFix extends BaseIntentionAction {
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile psiFile) throws IncorrectOperationException {
         try {
+            Companion.setCurrentResourcesFile(project);
             mantisResource.setProject(project);
-            mantisResource.setResourcesFile(Companion.getCurrentResourcesFile(project));
             ApplicationManager.getApplication().invokeLater(() -> new CreateResourceDialog(mantisResource).show());
-        } catch (Exception ignored){}
+        } catch (Exception ignored){
+        }
     }
 
 }

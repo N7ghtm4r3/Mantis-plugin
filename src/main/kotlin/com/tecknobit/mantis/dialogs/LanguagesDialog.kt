@@ -8,11 +8,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.psi.PsiFile
+import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.jetbrains.rd.util.first
 import com.tecknobit.mantis.Mantis.MANTIS_RESOURCES_PATH
-import com.tecknobit.mantis.helpers.MantisManager.Companion.getCurrentResourcesFile
 import com.tecknobit.mantis.helpers.MantisManager.Companion.languagesSupported
 import com.tecknobit.mantis.helpers.MantisManager.Companion.mantisManager
 import com.tecknobit.mantis.helpers.MantisManager.MantisResource
@@ -54,11 +54,13 @@ class LanguagesDialog: AnAction() {
 
         private lateinit var panel: DialogPanel
 
+        private var autoTranslateSet: Boolean = true
+
         private val currentResources = JSONObject(resourcesFile.text)
 
         init {
             title = "Edit Current Languages Set"
-            setSize(400, 500)
+            setSize(400, 550)
             init()
         }
 
@@ -71,48 +73,34 @@ class LanguagesDialog: AnAction() {
                         rowLanguages.add(
                             LanguageSet(
                                 inserted = languageSetExists(language),
-                                language = language,
-                                translate = false
+                                language = language
                             )
                         )
                     }
                     threeColumnsRow(
                         column1 = {
-                            checkBox("")
+                            checkBox(rowLanguages[0].language.name)
                                 .bindSelected(rowLanguages[0]::inserted)
                                 .component.isSelected = rowLanguages[0].inserted
-                            text(rowLanguages[0].language.name)
-                            /*for(i in 0 until 3) {
-                                val languageSet = rowLanguages[i]
-                                checkBox("")
-                                    .bindSelected(languageSet::inserted)
-                                    .component.isSelected = languageSet.inserted
-                                text(languageSet.language.name)
-                            }*/
                         },
                         column2 = {
-                            checkBox("")
+                            checkBox(rowLanguages[1].language.name)
                                 .bindSelected(rowLanguages[1]::inserted)
                                 .component.isSelected = rowLanguages[1].inserted
-                            text(rowLanguages[1].language.name)
-                            /*for(i in 0 until 3) {
-                                val languageSet = rowLanguages[i]
-                                checkBox("Auto translate the set")
-                                    .bindSelected(languageSet::translate)
-                                    //.component.isVisible = languageSet.inserted
-                            }*/
                         },
                         column3 = {
-                            checkBox("")
+                            checkBox(rowLanguages[2].language.name)
                                 .bindSelected(rowLanguages[2]::inserted)
                                 .component.isSelected = rowLanguages[2].inserted
-                            text(rowLanguages[2].language.name)
-                            checkBox("Auto translate the set")
-                                .bindSelected(rowLanguages[2]::translate)
                         }
                     )
                     separator()
                     languagesSet.addAll(rowLanguages)
+                }
+                row {
+                    checkBox("Auto translate the set")
+                        .bindSelected(::autoTranslateSet)
+                        .align(Align.CENTER)
                 }
             }
             return panel
@@ -161,7 +149,7 @@ class LanguagesDialog: AnAction() {
                 languagesSet.forEach { languageSet ->
                     val languageKey = mantisManager.getLanguage(languageSet.language.code)!!.code
                     if(!completeSet.containsKey(languageKey)) {
-                        mantisResource.autoTranslate = languageSet.translate
+                        mantisResource.autoTranslate = autoTranslateSet
                         set.keys().forEach { resourceKey ->
                             mantisResource.key = resourceKey
                             mantisResource.resource = set.getString(resourceKey)
@@ -169,7 +157,7 @@ class LanguagesDialog: AnAction() {
                         }
                     }
                 }
-                mantisManager.saveResources(getCurrentResourcesFile(project), currentResources, project)
+                mantisManager.saveResources(currentResources, project)
             }
         }
 
@@ -197,8 +185,7 @@ class LanguagesDialog: AnAction() {
 
     data class LanguageSet(
         var inserted: Boolean,
-        var language: Language,
-        var translate: Boolean
+        var language: Language
     )
 
 }
