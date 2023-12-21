@@ -36,6 +36,9 @@
     <annotator
             language="kotlin"
             implementationClass="annotators.MantisAnnotator"/>
+    <annotator
+            language="Mantis"
+            implementationClass="annotators.MantisResourcesAnnotator"/>
     <lang.parserDefinition
             language="Mantis"
             implementationClass="org.intellij.sdk.language.parser.MantisParserDefinition"/>

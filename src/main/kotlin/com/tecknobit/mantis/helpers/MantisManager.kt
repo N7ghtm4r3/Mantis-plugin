@@ -16,21 +16,47 @@ import org.json.JSONObject
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.*
 
-
+/**
+ * The {@code MantisManager} class is useful to manage the Mantis plugin handling the resource creation and the set of the
+ * languages used by the user
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ */
 open class MantisManager {
 
     companion object {
 
+        /**
+         * **MANTIS_KEY_SUFFIX** -> the suffix of a Mantis resource key
+         */
         const val MANTIS_KEY_SUFFIX = "_key"
 
+        /**
+         * **MANTIS_INSTANCE_NAME** -> the default name of a mantis instance, useful when replaced and inserted in the
+         * class where the resource has been created
+         */
         const val MANTIS_INSTANCE_NAME = "mantis"
 
+        /**
+         * **mantisManager** -> the instance of the [MantisManager]
+         */
         val mantisManager = MantisManager()
 
+        /**
+         * **resourcesFile** -> the current resources file
+         */
         private var resourcesFile: VirtualFile? = null
 
+        /**
+         * **languagesSupported** -> list of the currently languages supported
+         */
         val languagesSupported = Language.values().toMutableList().subList(0, Language.values().size - 1)
 
+        /**
+         * Function to set the [currentResources] file
+         *
+         * @param project: the current project where the plugin is working on
+         */
         fun setCurrentResourcesFile(project: Project) {
             if(resourcesFile == null) {
                 for (virtualFile in ProjectRootManager.getInstance(project).contentRoots) {
@@ -55,10 +81,21 @@ open class MantisManager {
 
     }
 
+    /**
+     * **currentResources** -> the current resources
+     */
     private var currentResources = JSONObject()
 
+    /**
+     * **mantisResource** -> the instance of a [MantisResource]
+     */
     var mantisResource = MantisResource()
 
+    /**
+     * Function to create a new resource
+     *
+     * No-any params required
+     */
     fun createNewResource() {
         loadResources()
         val resourceKey = formatKey(mantisResource.key)
@@ -87,6 +124,13 @@ open class MantisManager {
         }
     }
 
+    /**
+     * Function to create and save a single new resource
+     *
+     * @param mantisResource: the resource to save
+     * @param currentResources: the current resources saved
+     * @param language: the language of the new resource
+     */
     fun createSingleResource(
         mantisResource: MantisResource,
         currentResources: JSONObject,
@@ -105,6 +149,12 @@ open class MantisManager {
         currentResources.put(language, languageSet)
     }
 
+    /**
+     * Function to save and apply the new [currentResources]
+     *
+     * @param currentResources: the current resources saved
+     * @param project: the current project where the plugin is working on
+     */
     fun saveResources(
         currentResources: JSONObject,
         project: Project
@@ -120,6 +170,13 @@ open class MantisManager {
         }
     }
 
+    /**
+     * Function to get the current languages set saved and used
+     *
+     * No-any params required
+     *
+     * @return the current languages set saved and used as [List] of [Language]
+     */
     fun currentLanguagesSet(): List<Language> {
         loadResources()
         val languages = mutableListOf<Language>()
@@ -129,6 +186,12 @@ open class MantisManager {
         return languages
     }
 
+    /**
+     * Function to get a language
+     * @param language: the code of the language to get
+     *
+     * @return the language as [Language]
+     */
     fun getLanguage(
         language: String
     ): Language? {
@@ -140,6 +203,12 @@ open class MantisManager {
         return vLanguage
     }
 
+    /**
+     * Function to format correctly a key for a resource
+     *
+     * @param key: the key to format
+     * @return the key correclty formatted as [String]
+     */
     private fun formatKey(
         key: String
     ): String {
@@ -147,17 +216,40 @@ open class MantisManager {
             .replace("-key", "").replace("key", "") + MANTIS_KEY_SUFFIX
     }
 
-    fun keyExists(
+    /**
+     * Function to check whether a key of a resource already exists
+     *
+     * @param resourceKey: the resource key to check whether exists
+     * @return whether a key of a resource already exists [Boolean]
+     */
+    open fun keyExists(
         resourceKey: String
     ): Boolean {
         loadResources()
         return currentResources.toString().contains("\"${formatKey(resourceKey)}\":")
     }
 
+    /**
+     * Function to load the [currentResources]
+     *
+     * No-any params required
+     */
     private fun loadResources() {
         currentResources = JSONObject(String(resourcesFile!!.contentsToByteArray()))
     }
 
+    /**
+     * The {@code MantisResource} class is useful to define a Mantis resource
+     *
+     * @param isJavaExpression: whether is a Java expression or a Kotlin expression
+     * @param project: the current project where the plugin is working on
+     * @param resourceElement: the [PsiElement] to replace
+     * @param resource: the resource content to save
+     * @param defLanguageValue: the default language of the new resource to save
+     * @param key: the key for the resource to save
+     * @param autoTranslate: whether the resource must be translated automatically
+     * @author N7ghtm4r3 - Tecknobit
+     */
     data class MantisResource(
         var isJavaExpression: Boolean = true,
         var project: Project? = null,

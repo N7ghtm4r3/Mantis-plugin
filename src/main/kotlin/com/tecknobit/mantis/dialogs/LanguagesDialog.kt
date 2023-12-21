@@ -20,12 +20,31 @@ import net.suuft.libretranslate.Language
 import org.json.JSONObject
 import javax.swing.JComponent
 
+/**
+ * The {@code LanguagesDialog} class is useful to handle the action to show the languages set of the user currently selected and
+ * managed
+ *
+ * @author N7ghtm4r3 - Tecknobit
+ * @see AnAction
+ */
 class LanguagesDialog: AnAction() {
 
+    /**
+     * Function to get the action update thread
+     *
+     * No-any params required
+     *
+     * @return [ActionUpdateThread.BGT] as [ActionUpdateThread]
+     */
     override fun getActionUpdateThread(): ActionUpdateThread {
         return ActionUpdateThread.BGT
     }
 
+    /**
+     * Function to catch the update event occurred
+     *
+     * @param e: the action event occurred
+     */
     override fun update(e: AnActionEvent) {
         val file = e.getData(PlatformDataKeys.PSI_FILE)
         if(file != null)
@@ -34,6 +53,11 @@ class LanguagesDialog: AnAction() {
             e.presentation.isEnabledAndVisible = false
     }
 
+    /**
+     * Function to catch the action performed by the user
+     *
+     * @param action: the action event occurred
+     */
     override fun actionPerformed(action: AnActionEvent) {
         val project = action.getData(PlatformDataKeys.PROJECT)
         val resourcesFile = action.getData(PlatformDataKeys.PSI_FILE)
@@ -46,16 +70,35 @@ class LanguagesDialog: AnAction() {
         }
     }
 
+    /**
+     * The {@code LanguagesSetDialog} class to launch the dialog to show the languages set of the user currently
+     * selected and managed
+     *
+     * @param project: the current project where the plugin is working on
+     * @param resourcesFile: the current resources file
+     * @param languagesSet: the set of languages to manage
+     * @author N7ghtm4r3 - Tecknobit
+     * @see DialogWrapper
+     */
     private inner class LanguagesSetDialog(
         var project: Project,
         resourcesFile: PsiFile,
         var languagesSet: MutableList<LanguageSet>
     ): DialogWrapper(true) {
 
+        /**
+         * **panel** -> the main panel of the dialog
+         */
         private lateinit var panel: DialogPanel
 
+        /**
+         * **autoTranslateSet** -> whether translate the resources of the set selected
+         */
         private var autoTranslateSet: Boolean = true
 
+        /**
+         * **currentResources** -> the current resources of languages
+         */
         private val currentResources = JSONObject(resourcesFile.text)
 
         init {
@@ -64,6 +107,13 @@ class LanguagesDialog: AnAction() {
             init()
         }
 
+        /**
+         * Function to create the center panel of the dialog
+         *
+         * No-any params required
+         *
+         * @return panel as [JComponent]
+         */
         override fun createCenterPanel(): JComponent {
             panel = panel {
                 for (j in 0 until languagesSupported.size step 3) {
@@ -106,23 +156,44 @@ class LanguagesDialog: AnAction() {
             return panel
         }
 
+        /**
+         * Function to check whether a language set already exists
+         *
+         * @param language: the language to check the existence of its set
+         * @return whether a language set already exists as [Boolean]
+         */
         private fun languageSetExists(
             language: Language
         ): Boolean {
             return currentResources.has(language.code)
         }
 
+        /**
+         * Function to perform the ok action
+         *
+         * No-any params required
+         */
         override fun doOKAction() {
             panel.apply()
             super.doOKAction()
             workOnResources()
         }
 
+        /**
+         * Function to work and update the current resources
+         *
+         * No-any params required
+         */
         private fun workOnResources() {
             setKeysSet()
             createResources()
         }
 
+        /**
+         * Function to set the keys of the set
+         *
+         * No-any params required
+         */
         private fun setKeysSet() {
             val removedSetKeys = mutableListOf<LanguageSet>()
             languagesSet.forEach { languagesSet ->
@@ -139,6 +210,11 @@ class LanguagesDialog: AnAction() {
             languagesSet.removeAll(removedSetKeys)
         }
 
+        /**
+         * Function to fill the languages set with the resources
+         *
+         * No-any params required
+         */
         private fun createResources() {
             val completeSet = getCompleteSet()
             if(completeSet != null) {
@@ -161,6 +237,12 @@ class LanguagesDialog: AnAction() {
             }
         }
 
+        /**
+         * Function to get the current completed languages set
+         *
+         * No-any params required
+         * @return the current completed languages set as [Map]<[String], [JSONObject]>
+         */
         private fun getCompleteSet(): Map<String, JSONObject>? {
             val completeSet = mutableMapOf<String, JSONObject>()
             currentResources.keys().forEach { key ->
@@ -183,6 +265,13 @@ class LanguagesDialog: AnAction() {
 
     }
 
+    /**
+     * The {@code LanguageSet} class is useful to define a language set
+     *
+     * @param inserted: whether the set is currently inserted
+     * @param language: the language of the set
+     * @author N7ghtm4r3 - Tecknobit
+     */
     data class LanguageSet(
         var inserted: Boolean,
         var language: Language
