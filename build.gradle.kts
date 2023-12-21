@@ -11,8 +11,6 @@ repositories {
   mavenCentral()
   maven("https://jitpack.io")
   maven("https://repo.clojars.org")
-  // TO-DO: TESTING PURPOSES ONLY REMOVE
-  mavenLocal()
 }
 
 intellij {
@@ -26,7 +24,7 @@ sourceSets["main"].java.srcDirs("src/main/gen")
 
 dependencies {
 
-  implementation("com.tecknobit.mantis:Mantis:1.0.0")
+  implementation("com.github.N7ghtm4r3:Mantis:1.0.0")
   implementation("org.json:json:20230227")
   implementation("net.clojars.suuft:libretranslate-java:1.0.5")
 
