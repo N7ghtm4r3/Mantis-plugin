@@ -1,5 +1,5 @@
 # Mantis-plugin
-**v1.0.0**
+**v1.0.1**
 
 This is the GitHub's repository of **Mantis**'s IntelliJ Idea plugin, based on the main library
 <a href="https://github.com/N7ghtm4r3/Mantis">Mantis</a>.
@@ -46,4 +46,4 @@ If you want support project and developer
 If you want support project and developer
 with <a href="https://www.paypal.com/donate/?hosted_button_id=5QMN5UQH7LDT4">PayPal</a>
 
-Copyright © 2023 Tecknobit
+Copyright © 2024 Tecknobit

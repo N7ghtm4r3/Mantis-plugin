@@ -20,7 +20,7 @@ public class MantisResourcesAnnotator implements Annotator {
      * Method to annotate
      *
      * @param psiElement: the element where launch the annotation
-     * @param annotationHolder: the holder which managet the annotation creation
+     * @param annotationHolder: the holder which manage the annotation creation
      */
     @Override
     public void annotate(@NotNull PsiElement psiElement, @NotNull AnnotationHolder annotationHolder) {

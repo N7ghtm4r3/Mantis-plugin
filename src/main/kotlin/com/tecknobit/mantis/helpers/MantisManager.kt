@@ -63,20 +63,31 @@ open class MantisManager {
                     if (virtualFile.path.endsWith("main")) {
                         val resDirectory = virtualFile.findOrCreateChildData("mantis", "resources")
                         val mantisResourcesFile = resDirectory.findChild(MANTIS_RESOURCES_PATH)
-                        if(mantisResourcesFile != null)
+                        if(mantisResourcesFile != null) {
                             resourcesFile = mantisResourcesFile
-                        else {
+                            if(String(resourcesFile!!.contentsToByteArray()).isEmpty())
+                                initResourcesFile()
+                        } else {
                             resourcesFile = PsiDirectoryFactory.getInstance(project)
                                 .createDirectory(resDirectory)
                                 .createFile(MANTIS_RESOURCES_PATH).virtualFile
-                            resourcesFile!!.setBinaryContent(JSONObject().put(
-                                Locale.getDefault().language,
-                                JSONObject()
-                            ).toString(4).toByteArray(UTF_8))
+                            initResourcesFile()
                         }
                     }
                 }
             }
+        }
+
+        /**
+         * Function to init the [currentResources] file
+         *
+         * No-any params required
+         */
+        private fun initResourcesFile() {
+            resourcesFile!!.setBinaryContent(JSONObject().put(
+                Locale.getDefault().language,
+                JSONObject()
+            ).toString(4).toByteArray(UTF_8))
         }
 
     }
@@ -204,19 +215,6 @@ open class MantisManager {
     }
 
     /**
-     * Function to format correctly a key for a resource
-     *
-     * @param key: the key to format
-     * @return the key correclty formatted as [String]
-     */
-    private fun formatKey(
-        key: String
-    ): String {
-        return key.lowercase().replace(" ", "").replace(MANTIS_KEY_SUFFIX, "")
-            .replace("-key", "").replace("key", "") + MANTIS_KEY_SUFFIX
-    }
-
-    /**
      * Function to check whether a key of a resource already exists
      *
      * @param resourceKey: the resource key to check whether exists
@@ -227,6 +225,28 @@ open class MantisManager {
     ): Boolean {
         loadResources()
         return currentResources.toString().contains("\"${formatKey(resourceKey)}\":")
+    }
+
+    open fun resourceExists(
+        language: Language,
+        resource: String
+    ): Boolean {
+        loadResources()
+        return currentResources.getJSONObject(language.code).toString().lowercase()
+            .contains(": \"${resource.lowercase()}\"")
+    }
+
+    /**
+     * Function to format correctly a key for a resource
+     *
+     * @param key: the key to format
+     * @return the key correclty formatted as [String]
+     */
+    private fun formatKey(
+        key: String
+    ): String {
+        return key.lowercase().replace(" ", "").replace(MANTIS_KEY_SUFFIX, "")
+            .replace("-key", "").replace("key", "") + MANTIS_KEY_SUFFIX
     }
 
     /**
