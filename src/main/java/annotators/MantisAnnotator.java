@@ -3,16 +3,19 @@ package annotators;
 import com.intellij.lang.annotation.AnnotationBuilder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
-import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiLiteralExpression;
+import com.tecknobit.mantis.helpers.MantisManager;
 import fixs.CreateResourceFix;
+import fixs.ReplaceResourceFix;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.KtFile;
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression;
 
+import static com.intellij.lang.annotation.HighlightSeverity.WARNING;
+import static com.tecknobit.mantis.helpers.MantisManager.Companion;
 import static com.tecknobit.mantis.helpers.MantisManager.MANTIS_KEY_SUFFIX;
 
 /**
@@ -40,12 +43,14 @@ public class MantisAnnotator implements Annotator {
                     text.startsWith("\"") && text.endsWith("\"") &&
                     !text.replaceAll(" ", "").equals("\"\"") &&
                     !text.endsWith(MANTIS_KEY_SUFFIX + "\"")) {
-                AnnotationBuilder builder = holder.newAnnotation(HighlightSeverity.WARNING,
-                        "Create a new Mantis resource");
-                //if(mantisManager.keyExists())
+                AnnotationBuilder builder = holder.newAnnotation(WARNING, "Create a new Mantis resource");
+                Companion.setCurrentResourcesFile(element.getProject());
+                MantisManager mantisManager = new MantisManager();
+                String resourceKey = mantisManager.resourceExists(text);
+                if(resourceKey == null)
                     builder.withFix(new CreateResourceFix(isJavaExpression, element));
-                /*else
-                    builder.withFix();*/
+                else
+                    builder.withFix(new ReplaceResourceFix(isJavaExpression, element, resourceKey));
                 builder.create();
             }
         }

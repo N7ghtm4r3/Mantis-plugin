@@ -3,34 +3,39 @@ package fixs;
 import com.intellij.codeInsight.intention.impl.BaseIntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.codeInspection.util.IntentionName;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.IncorrectOperationException;
-import com.tecknobit.mantis.dialogs.CreateResourceDialog;
-import com.tecknobit.mantis.helpers.MantisManager.MantisResource;
+import com.tecknobit.mantis.helpers.MantisManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * The {@code CreateResourceFix} class is useful to create a new {@link MantisResource}
+ * The {@code ReplaceResourceFix} class is useful to replace a {@link PsiElement} with a {@link com.tecknobit.mantis.Mantis}
+ * resource
  *
  * @author N7ghtm4r3 - Tecknobit
  * @see MantisFix
  * @see BaseIntentionAction
  */
-public class CreateResourceFix extends MantisFix {
+public class ReplaceResourceFix extends MantisFix {
 
     /**
-     * Constructor to init the {@link CreateResourceFix} controller
+     * {@code resourceKey} the key of the resource to use
+     */
+    private final String resourceKey;
+
+    /**
+     * Constructor to init the {@link ReplaceResourceFix} controller
      *
      * @param isJavaExpression: whether is a Java expression or a Kotlin expression
      * @param resourceElement: the [PsiElement] to replace
      *
      */
-    public CreateResourceFix(boolean isJavaExpression, PsiElement resourceElement) {
+    public ReplaceResourceFix(boolean isJavaExpression, PsiElement resourceElement, String resourceKey) {
         super(isJavaExpression, resourceElement);
+        this.resourceKey = resourceKey;
     }
 
     /**
@@ -41,7 +46,7 @@ public class CreateResourceFix extends MantisFix {
      */
     @Override
     public @IntentionName @NotNull String getText() {
-        return "Create a new Mantis resource";
+        return "Matches with an already saved Mantis resource, transform it";
     }
 
     /**
@@ -77,11 +82,9 @@ public class CreateResourceFix extends MantisFix {
      */
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile psiFile) throws IncorrectOperationException {
-        try {
-            mantisResource.setProject(project);
-            ApplicationManager.getApplication().invokeLater(() -> new CreateResourceDialog(mantisResource).show());
-        } catch (Exception ignored){
-        }
+        MantisManager mantisManager = new MantisManager();
+        mantisResource.setProject(project);
+        mantisManager.useMantisInstance(resourceKey, mantisResource);
     }
 
 }

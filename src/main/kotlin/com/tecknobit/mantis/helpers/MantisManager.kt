@@ -115,24 +115,7 @@ open class MantisManager {
         }
         val project = mantisResource.project!!
         saveResources(currentResources, project)
-        WriteCommandAction.writeCommandAction(project).run<Throwable> {
-            val currentExpression = mantisResource.resourceElement!!
-            if(mantisResource.isJavaExpression) {
-                val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
-                val semiColon = if(currentExpression.text.endsWith(";"))
-                    ";"
-                else
-                    ""
-                currentExpression.replace(factory.createExpressionFromText(
-                    "$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")$semiColon",
-                    null
-                ))
-            } else {
-                val psiFactory = KtPsiFactory(project)
-                currentExpression.replace(psiFactory
-                    .createExpression("$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")"))
-            }
-        }
+        useMantisInstance(resourceKey, mantisResource)
     }
 
     /**
@@ -227,15 +210,6 @@ open class MantisManager {
         return currentResources.toString().contains("\"${formatKey(resourceKey)}\":")
     }
 
-    open fun resourceExists(
-        language: Language,
-        resource: String
-    ): Boolean {
-        loadResources()
-        return currentResources.getJSONObject(language.code).toString().lowercase()
-            .contains(": \"${resource.lowercase()}\"")
-    }
-
     /**
      * Function to format correctly a key for a resource
      *
@@ -247,6 +221,63 @@ open class MantisManager {
     ): String {
         return key.lowercase().replace(" ", "").replace(MANTIS_KEY_SUFFIX, "")
             .replace("-key", "").replace("key", "") + MANTIS_KEY_SUFFIX
+    }
+
+    /**
+     * Function to check whether a resource already exists
+     *
+     * @param resource: the resource value to check whether exists
+     * @return the key of the resource as [String] if already exists, null otherwise
+     */
+    open fun resourceExists(resource: String): String? {
+        loadResources()
+        var resourceKey: String? = null
+        val lowercaseResource = resource.lowercase()
+        if(currentResources.toString().lowercase().contains(":$lowercaseResource")) {
+            val matchResource = lowercaseResource.replace("\"", "")
+            currentResources.keys().forEach { language ->
+                if(resourceKey == null) {
+                    val languageSet = currentResources.getJSONObject(language)
+                    languageSet.keys().forEach { key ->
+                        if(languageSet.getString(key).lowercase() == matchResource)
+                            resourceKey = key
+                    }
+                } else
+                    return@forEach
+            }
+        }
+        return resourceKey
+    }
+
+    /**
+     * Function to use the Mantis instance
+     *
+     * @param resourceKey: the key of the resource to use
+     * @param mantisResource: the payload of the resource to use
+     */
+    fun useMantisInstance(
+        resourceKey: String,
+        mantisResource: MantisResource
+    ) {
+        val project = mantisResource.project!!
+        val isJavaExpression = mantisResource.isJavaExpression
+        val psiElement = mantisResource.resourceElement!!
+        WriteCommandAction.writeCommandAction(project).run<Throwable> {
+            if(isJavaExpression) {
+                val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
+                val semiColon = if(psiElement.text.endsWith(";"))
+                    ";"
+                else
+                    ""
+                psiElement.replace(factory.createExpressionFromText(
+                    "$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")$semiColon",
+                    null
+                ))
+            } else {
+                val psiFactory = KtPsiFactory(project)
+                psiElement.replace(psiFactory.createExpression("$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")"))
+            }
+        }
     }
 
     /**
