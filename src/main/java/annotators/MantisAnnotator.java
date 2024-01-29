@@ -9,6 +9,7 @@ import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiLiteralExpression;
 import com.tecknobit.mantis.helpers.MantisManager;
 import fixs.CreateResourceFix;
+import fixs.IgnoreResourceFix;
 import fixs.ReplaceResourceFix;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.KtFile;
@@ -36,22 +37,27 @@ public class MantisAnnotator implements Annotator {
     @Override
     public void annotate(@NotNull final PsiElement element, @NotNull AnnotationHolder holder) {
         PsiFile containerFile = element.getContainingFile();
+        MantisManager mantisManager = new MantisManager();
         if(containerFile instanceof PsiJavaFile || containerFile instanceof KtFile) {
             boolean isJavaExpression = element instanceof PsiLiteralExpression;
             String text = element.getText();
             if((isJavaExpression || element instanceof KtStringTemplateExpression) &&
                     text.startsWith("\"") && text.endsWith("\"") &&
                     !text.replaceAll(" ", "").equals("\"\"") &&
-                    !text.endsWith(MANTIS_KEY_SUFFIX + "\"")) {
-                AnnotationBuilder builder = holder.newAnnotation(WARNING, "Create a new Mantis resource");
+                    !text.endsWith(MANTIS_KEY_SUFFIX + "\"")
+            ) {
                 Companion.setCurrentResourcesFile(element.getProject());
-                MantisManager mantisManager = new MantisManager();
-                String resourceKey = mantisManager.resourceExists(text);
-                if(resourceKey == null)
-                    builder.withFix(new CreateResourceFix(isJavaExpression, element));
-                else
-                    builder.withFix(new ReplaceResourceFix(isJavaExpression, element, resourceKey));
-                builder.create();
+                text = text.toLowerCase().replaceAll("\"", "");
+                if(!mantisManager.isIgnoredResource(text)) {
+                    AnnotationBuilder builder = holder.newAnnotation(WARNING, "Create a new Mantis resource");
+                    String resourceKey = mantisManager.resourceExists(text);
+                    if(resourceKey == null) {
+                        builder.withFix(new CreateResourceFix(isJavaExpression, element));
+                        builder.withFix(new IgnoreResourceFix(text));
+                    } else
+                        builder.withFix(new ReplaceResourceFix(isJavaExpression, element, resourceKey));
+                    builder.create();
+                }
             }
         }
     }

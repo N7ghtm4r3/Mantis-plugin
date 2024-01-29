@@ -37,6 +37,8 @@ open class MantisManager {
          */
         const val MANTIS_INSTANCE_NAME = "mantis"
 
+        const val IGNORED_RESOURCES_KEY = "ignored_resources"
+
         /**
          * **mantisManager** -> the instance of the [MantisManager]
          */
@@ -84,6 +86,7 @@ open class MantisManager {
          * No-any params required
          */
         private fun initResourcesFile() {
+
             resourcesFile!!.setBinaryContent(JSONObject().put(
                 Locale.getDefault().language,
                 JSONObject()
@@ -96,6 +99,11 @@ open class MantisManager {
      * **currentResources** -> the current resources
      */
     private var currentResources = JSONObject()
+
+    /**
+     * **ignoredResources** -> the resources to be ignored
+     */
+    private var ignoredResources = JSONObject()
 
     /**
      * **mantisResource** -> the instance of a [MantisResource]
@@ -151,13 +159,18 @@ open class MantisManager {
      */
     fun saveResources(
         currentResources: JSONObject,
-        project: Project
+        project: Project,
+        refreshResources: Boolean = false
     ) {
         ProjectRootManager.getInstance(project).fileIndex.iterateContent { file: VirtualFile ->
             val path = file.path
             if (path.endsWith(MANTIS_RESOURCES_PATH)) {
+                if(refreshResources)
+                    loadResources()
                 WriteCommandAction.writeCommandAction(project).run<Throwable> {
+                    currentResources.put(IGNORED_RESOURCES_KEY, ignoredResources)
                     file.setBinaryContent(currentResources.toString(4).toByteArray(UTF_8))
+                    currentResources.remove(IGNORED_RESOURCES_KEY)
                 }
             }
             true
@@ -281,12 +294,43 @@ open class MantisManager {
     }
 
     /**
+     * Function to check whether a resource is to be ignored
+     *
+     * @param resource: the resource to check if is to ignore
+     * @return whether a resource is to be ignored as [Boolean]
+     */
+    fun isIgnoredResource(resource: String): Boolean {
+        loadResources()
+        return ignoredResources.has(resource)
+    }
+
+    /**
+     * Function to insert a new resource to ignore
+     *
+     * @param resource: the resource to ignore
+     * @param project: the current project where the plugin is working on
+     */
+    fun insertIgnoredResource(
+        resource: String,
+        project: Project
+    ) {
+        loadResources()
+        ignoredResources.put(resource, System.currentTimeMillis())
+        saveResources(currentResources, project)
+    }
+
+    /**
      * Function to load the [currentResources]
      *
      * No-any params required
      */
     private fun loadResources() {
         currentResources = JSONObject(String(resourcesFile!!.contentsToByteArray()))
+        if(currentResources.has(IGNORED_RESOURCES_KEY)) {
+            ignoredResources = currentResources.getJSONObject(IGNORED_RESOURCES_KEY)
+            currentResources.remove(IGNORED_RESOURCES_KEY)
+        } else
+            ignoredResources = JSONObject()
     }
 
     /**
