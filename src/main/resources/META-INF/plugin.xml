@@ -1,7 +1,7 @@
 <idea-plugin>
 
   <id>com.tecknobit.mantisplugin</id>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>Mantis</name>
   <vendor email="infotecknobitcompany@gmail.com" url="https://github.com/N7ghtm4r3">Tecknobit</vendor>
 
@@ -15,7 +15,22 @@
 
   <change-notes>
     <![CDATA[
-            <h1>v. 1.0.0</h1><br>
+            <h1>v. 1.0.1</h1><br>
+            The workflow has been optimized and perfected:
+            <ul>
+                <li>
+                    The literal expressions like boolean, integers or any number now are not counted
+                </li>
+                <li>
+                    Added the option to ignore the creation of possible Mantis resource to add
+                </li>
+                <li>
+                    Added the option to replace a resource if is already exists as Mantis resource
+                </li>
+                <li>
+                    Fix some minor issues
+                </li>
+            </ul>
         ]]>
   </change-notes>
 

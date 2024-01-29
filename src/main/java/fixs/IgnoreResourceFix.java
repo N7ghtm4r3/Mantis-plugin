@@ -3,34 +3,34 @@ package fixs;
 import com.intellij.codeInsight.intention.impl.BaseIntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.codeInspection.util.IntentionName;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.IncorrectOperationException;
-import com.tecknobit.mantis.dialogs.CreateResourceDialog;
-import com.tecknobit.mantis.helpers.MantisManager.MantisResource;
+import com.tecknobit.mantis.helpers.MantisManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * The {@code CreateResourceFix} class is useful to create a new {@link MantisResource}
+ * The {@code IgnoreResourceFix} class is useful to ignore a possible Mantis resource
  *
  * @author N7ghtm4r3 - Tecknobit
- * @see MantisFix
  * @see BaseIntentionAction
  */
-public class CreateResourceFix extends MantisFix {
+public class IgnoreResourceFix extends BaseIntentionAction {
 
     /**
-     * Constructor to init the {@link CreateResourceFix} controller
+     * {@code resourceToIgnore} the resource to ignore
+     */
+    private final String resourceToIgnore;
+
+    /**
+     * Constructor to init the {@link IgnoreResourceFix} class
      *
-     * @param isJavaExpression: whether is a Java expression or a Kotlin expression
-     * @param resourceElement: the [PsiElement] to replace
+     * @param resourceToIgnore: the resource to ignore
      *
      */
-    public CreateResourceFix(boolean isJavaExpression, PsiElement resourceElement) {
-        super(isJavaExpression, resourceElement);
+    public IgnoreResourceFix(String resourceToIgnore) {
+        this.resourceToIgnore = resourceToIgnore;
     }
 
     /**
@@ -41,7 +41,7 @@ public class CreateResourceFix extends MantisFix {
      */
     @Override
     public @IntentionName @NotNull String getText() {
-        return "Create a new Mantis resource";
+        return "Ignore this possible Mantis resource";
     }
 
     /**
@@ -77,11 +77,8 @@ public class CreateResourceFix extends MantisFix {
      */
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile psiFile) throws IncorrectOperationException {
-        try {
-            mantisResource.setProject(project);
-            ApplicationManager.getApplication().invokeLater(() -> new CreateResourceDialog(mantisResource).show());
-        } catch (Exception ignored){
-        }
+        MantisManager manager = new MantisManager();
+        manager.insertIgnoredResource(resourceToIgnore, project);
     }
 
 }

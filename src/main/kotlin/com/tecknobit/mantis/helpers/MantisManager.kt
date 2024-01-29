@@ -38,6 +38,11 @@ open class MantisManager {
         const val MANTIS_INSTANCE_NAME = "mantis"
 
         /**
+         * **IGNORED_RESOURCES_KEY** -> the key of the ignored resources
+         */
+        const val IGNORED_RESOURCES_KEY = "ignored_resources"
+
+        /**
          * **mantisManager** -> the instance of the [MantisManager]
          */
         val mantisManager = MantisManager()
@@ -63,20 +68,32 @@ open class MantisManager {
                     if (virtualFile.path.endsWith("main")) {
                         val resDirectory = virtualFile.findOrCreateChildData("mantis", "resources")
                         val mantisResourcesFile = resDirectory.findChild(MANTIS_RESOURCES_PATH)
-                        if(mantisResourcesFile != null)
+                        if(mantisResourcesFile != null) {
                             resourcesFile = mantisResourcesFile
-                        else {
+                            if(String(resourcesFile!!.contentsToByteArray()).isEmpty())
+                                initResourcesFile()
+                        } else {
                             resourcesFile = PsiDirectoryFactory.getInstance(project)
                                 .createDirectory(resDirectory)
                                 .createFile(MANTIS_RESOURCES_PATH).virtualFile
-                            resourcesFile!!.setBinaryContent(JSONObject().put(
-                                Locale.getDefault().language,
-                                JSONObject()
-                            ).toString(4).toByteArray(UTF_8))
+                            initResourcesFile()
                         }
                     }
                 }
             }
+        }
+
+        /**
+         * Function to init the [currentResources] file
+         *
+         * No-any params required
+         */
+        private fun initResourcesFile() {
+
+            resourcesFile!!.setBinaryContent(JSONObject().put(
+                Locale.getDefault().language,
+                JSONObject()
+            ).toString(4).toByteArray(UTF_8))
         }
 
     }
@@ -85,6 +102,11 @@ open class MantisManager {
      * **currentResources** -> the current resources
      */
     private var currentResources = JSONObject()
+
+    /**
+     * **ignoredResources** -> the resources to be ignored
+     */
+    private var ignoredResources = JSONObject()
 
     /**
      * **mantisResource** -> the instance of a [MantisResource]
@@ -104,24 +126,7 @@ open class MantisManager {
         }
         val project = mantisResource.project!!
         saveResources(currentResources, project)
-        WriteCommandAction.writeCommandAction(project).run<Throwable> {
-            val currentExpression = mantisResource.resourceElement!!
-            if(mantisResource.isJavaExpression) {
-                val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
-                val semiColon = if(currentExpression.text.endsWith(";"))
-                    ";"
-                else
-                    ""
-                currentExpression.replace(factory.createExpressionFromText(
-                    "$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")$semiColon",
-                    null
-                ))
-            } else {
-                val psiFactory = KtPsiFactory(project)
-                currentExpression.replace(psiFactory
-                    .createExpression("$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")"))
-            }
-        }
+        useMantisInstance(resourceKey, mantisResource)
     }
 
     /**
@@ -157,14 +162,21 @@ open class MantisManager {
      */
     fun saveResources(
         currentResources: JSONObject,
-        project: Project
+        project: Project,
+        refreshResources: Boolean = false
     ) {
         ProjectRootManager.getInstance(project).fileIndex.iterateContent { file: VirtualFile ->
             val path = file.path
             if (path.endsWith(MANTIS_RESOURCES_PATH)) {
-                WriteCommandAction.writeCommandAction(project).run<Throwable> {
-                    file.setBinaryContent(currentResources.toString(4).toByteArray(UTF_8))
-                }
+                if(refreshResources)
+                    loadResources()
+                try {
+                    WriteCommandAction.writeCommandAction(project).run<Throwable> {
+                        currentResources.put(IGNORED_RESOURCES_KEY, ignoredResources)
+                        file.setBinaryContent(currentResources.toString(4).toByteArray(UTF_8))
+                        currentResources.remove(IGNORED_RESOURCES_KEY)
+                    }
+                } catch (_: IllegalStateException) {}
             }
             true
         }
@@ -204,19 +216,6 @@ open class MantisManager {
     }
 
     /**
-     * Function to format correctly a key for a resource
-     *
-     * @param key: the key to format
-     * @return the key correclty formatted as [String]
-     */
-    private fun formatKey(
-        key: String
-    ): String {
-        return key.lowercase().replace(" ", "").replace(MANTIS_KEY_SUFFIX, "")
-            .replace("-key", "").replace("key", "") + MANTIS_KEY_SUFFIX
-    }
-
-    /**
      * Function to check whether a key of a resource already exists
      *
      * @param resourceKey: the resource key to check whether exists
@@ -230,12 +229,113 @@ open class MantisManager {
     }
 
     /**
+     * Function to format correctly a key for a resource
+     *
+     * @param key: the key to format
+     * @return the key correclty formatted as [String]
+     */
+    private fun formatKey(
+        key: String
+    ): String {
+        return key.lowercase().replace(" ", "").replace(MANTIS_KEY_SUFFIX, "")
+            .replace("-key", "").replace("key", "") + MANTIS_KEY_SUFFIX
+    }
+
+    /**
+     * Function to check whether a resource already exists
+     *
+     * @param resource: the resource value to check whether exists
+     * @return the key of the resource as [String] if already exists, null otherwise
+     */
+    open fun resourceExists(resource: String): String? {
+        loadResources()
+        var resourceKey: String? = null
+        val lowercaseResource = resource.lowercase()
+        if(currentResources.toString().lowercase().contains(":$lowercaseResource")) {
+            val matchResource = lowercaseResource.replace("\"", "")
+            currentResources.keys().forEach { language ->
+                if(resourceKey == null) {
+                    val languageSet = currentResources.getJSONObject(language)
+                    languageSet.keys().forEach { key ->
+                        if(languageSet.getString(key).lowercase() == matchResource)
+                            resourceKey = key
+                    }
+                } else
+                    return@forEach
+            }
+        }
+        return resourceKey
+    }
+
+    /**
+     * Function to use the Mantis instance
+     *
+     * @param resourceKey: the key of the resource to use
+     * @param mantisResource: the payload of the resource to use
+     */
+    fun useMantisInstance(
+        resourceKey: String,
+        mantisResource: MantisResource
+    ) {
+        val project = mantisResource.project!!
+        val isJavaExpression = mantisResource.isJavaExpression
+        val psiElement = mantisResource.resourceElement!!
+        WriteCommandAction.writeCommandAction(project).run<Throwable> {
+            if(isJavaExpression) {
+                val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
+                val semiColon = if(psiElement.text.endsWith(";"))
+                    ";"
+                else
+                    ""
+                psiElement.replace(factory.createExpressionFromText(
+                    "$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")$semiColon",
+                    null
+                ))
+            } else {
+                val psiFactory = KtPsiFactory(project)
+                psiElement.replace(psiFactory.createExpression("$MANTIS_INSTANCE_NAME.getResource(\"$resourceKey\")"))
+            }
+        }
+    }
+
+    /**
+     * Function to check whether a resource is to be ignored
+     *
+     * @param resource: the resource to check if is to ignore
+     * @return whether a resource is to be ignored as [Boolean]
+     */
+    fun isIgnoredResource(resource: String): Boolean {
+        loadResources()
+        return ignoredResources.has(resource)
+    }
+
+    /**
+     * Function to insert a new resource to ignore
+     *
+     * @param resource: the resource to ignore
+     * @param project: the current project where the plugin is working on
+     */
+    fun insertIgnoredResource(
+        resource: String,
+        project: Project
+    ) {
+        loadResources()
+        ignoredResources.put(resource, System.currentTimeMillis())
+        saveResources(currentResources, project)
+    }
+
+    /**
      * Function to load the [currentResources]
      *
      * No-any params required
      */
     private fun loadResources() {
         currentResources = JSONObject(String(resourcesFile!!.contentsToByteArray()))
+        if(currentResources.has(IGNORED_RESOURCES_KEY)) {
+            ignoredResources = currentResources.getJSONObject(IGNORED_RESOURCES_KEY)
+            currentResources.remove(IGNORED_RESOURCES_KEY)
+        } else
+            ignoredResources = JSONObject()
     }
 
     /**

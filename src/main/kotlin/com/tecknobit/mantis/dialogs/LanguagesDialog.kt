@@ -13,6 +13,7 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.jetbrains.rd.util.first
 import com.tecknobit.mantis.Mantis.MANTIS_RESOURCES_PATH
+import com.tecknobit.mantis.helpers.MantisManager.Companion.IGNORED_RESOURCES_KEY
 import com.tecknobit.mantis.helpers.MantisManager.Companion.languagesSupported
 import com.tecknobit.mantis.helpers.MantisManager.Companion.mantisManager
 import com.tecknobit.mantis.helpers.MantisManager.MantisResource
@@ -102,6 +103,7 @@ class LanguagesDialog: AnAction() {
         private val currentResources = JSONObject(resourcesFile.text)
 
         init {
+            currentResources.remove(IGNORED_RESOURCES_KEY)
             title = "Edit Current Languages Set"
             setSize(400, 550)
             init()
@@ -233,7 +235,7 @@ class LanguagesDialog: AnAction() {
                         }
                     }
                 }
-                mantisManager.saveResources(currentResources, project)
+                mantisManager.saveResources(currentResources, project, true)
             }
         }
 
