@@ -37,6 +37,9 @@ open class MantisManager {
          */
         const val MANTIS_INSTANCE_NAME = "mantis"
 
+        /**
+         * **IGNORED_RESOURCES_KEY** -> the key of the ignored resources
+         */
         const val IGNORED_RESOURCES_KEY = "ignored_resources"
 
         /**
@@ -167,11 +170,13 @@ open class MantisManager {
             if (path.endsWith(MANTIS_RESOURCES_PATH)) {
                 if(refreshResources)
                     loadResources()
-                WriteCommandAction.writeCommandAction(project).run<Throwable> {
-                    currentResources.put(IGNORED_RESOURCES_KEY, ignoredResources)
-                    file.setBinaryContent(currentResources.toString(4).toByteArray(UTF_8))
-                    currentResources.remove(IGNORED_RESOURCES_KEY)
-                }
+                try {
+                    WriteCommandAction.writeCommandAction(project).run<Throwable> {
+                        currentResources.put(IGNORED_RESOURCES_KEY, ignoredResources)
+                        file.setBinaryContent(currentResources.toString(4).toByteArray(UTF_8))
+                        currentResources.remove(IGNORED_RESOURCES_KEY)
+                    }
+                } catch (_: IllegalStateException) {}
             }
             true
         }
