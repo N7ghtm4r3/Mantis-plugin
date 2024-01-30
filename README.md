@@ -1,5 +1,5 @@
 # Mantis-plugin
-**v1.0.1**
+**v1.0.2**
 
 This is the GitHub's repository of **Mantis**'s IntelliJ Idea plugin, based on the main library
 <a href="https://github.com/N7ghtm4r3/Mantis">Mantis</a>.

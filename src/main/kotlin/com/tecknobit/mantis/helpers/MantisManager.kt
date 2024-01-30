@@ -1,5 +1,6 @@
 package com.tecknobit.mantis.helpers
 
+import com.intellij.openapi.application.ApplicationManager.getApplication
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
@@ -9,6 +10,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.impl.file.PsiDirectoryFactory
 import com.tecknobit.mantis.Mantis.MANTIS_RESOURCES_PATH
+import kotlinx.coroutines.Runnable
 import net.suuft.libretranslate.Language
 import net.suuft.libretranslate.Translator
 import org.jetbrains.kotlin.psi.KtPsiFactory
@@ -73,9 +75,19 @@ open class MantisManager {
                             if(String(resourcesFile!!.contentsToByteArray()).isEmpty())
                                 initResourcesFile()
                         } else {
-                            resourcesFile = PsiDirectoryFactory.getInstance(project)
-                                .createDirectory(resDirectory)
-                                .createFile(MANTIS_RESOURCES_PATH).virtualFile
+                            val application = getApplication()
+                            val runnable = Runnable {
+                                resourcesFile = PsiDirectoryFactory.getInstance(project)
+                                    .createDirectory(resDirectory)
+                                    .createFile(MANTIS_RESOURCES_PATH).virtualFile
+                            }
+                            if(application.isDispatchThread)
+                                application.runWriteAction(runnable)
+                            else {
+                                application.invokeLater {
+                                    application.runWriteAction(runnable)
+                                }
+                            }
                             initResourcesFile()
                         }
                     }
@@ -89,11 +101,20 @@ open class MantisManager {
          * No-any params required
          */
         private fun initResourcesFile() {
-
-            resourcesFile!!.setBinaryContent(JSONObject().put(
-                Locale.getDefault().language,
-                JSONObject()
-            ).toString(4).toByteArray(UTF_8))
+            val application = getApplication()
+            val runnable = Runnable {
+                resourcesFile!!.setBinaryContent(JSONObject().put(
+                    Locale.getDefault().language,
+                    JSONObject()
+                ).toString(4).toByteArray(UTF_8))
+            }
+            if(application.isDispatchThread)
+                application.runWriteAction(runnable)
+            else {
+                application.invokeLater {
+                    application.runWriteAction(runnable)
+                }
+            }
         }
 
     }
@@ -251,7 +272,7 @@ open class MantisManager {
         loadResources()
         var resourceKey: String? = null
         val lowercaseResource = resource.lowercase()
-        if(currentResources.toString().lowercase().contains(":$lowercaseResource")) {
+        if(currentResources.toString().lowercase().contains(":\"$lowercaseResource\"")) {
             val matchResource = lowercaseResource.replace("\"", "")
             currentResources.keys().forEach { language ->
                 if(resourceKey == null) {
@@ -330,12 +351,20 @@ open class MantisManager {
      * No-any params required
      */
     private fun loadResources() {
-        currentResources = JSONObject(String(resourcesFile!!.contentsToByteArray()))
-        if(currentResources.has(IGNORED_RESOURCES_KEY)) {
-            ignoredResources = currentResources.getJSONObject(IGNORED_RESOURCES_KEY)
-            currentResources.remove(IGNORED_RESOURCES_KEY)
-        } else
-            ignoredResources = JSONObject()
+        if(resourcesFile != null) {
+            val content = String(resourcesFile!!.contentsToByteArray())
+            if(content.isNotEmpty()) {
+                currentResources = JSONObject(content)
+                if(currentResources.has(IGNORED_RESOURCES_KEY)) {
+                    ignoredResources = currentResources.getJSONObject(IGNORED_RESOURCES_KEY)
+                    currentResources.remove(IGNORED_RESOURCES_KEY)
+                } else
+                    ignoredResources = JSONObject()
+            } else {
+                currentResources = JSONObject()
+                ignoredResources = JSONObject()
+            }
+        }
     }
 
     /**
