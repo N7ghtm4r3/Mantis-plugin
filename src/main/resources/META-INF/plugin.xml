@@ -1,7 +1,7 @@
 <idea-plugin>
 
   <id>com.tecknobit.mantisplugin</id>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <name>Mantis</name>
   <vendor email="infotecknobitcompany@gmail.com" url="https://github.com/N7ghtm4r3">Tecknobit</vendor>
 
